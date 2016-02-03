@@ -660,7 +660,7 @@ static bool complies_scheme(private_auth_cfg_t *this, auth_cfg_t *constraints,
 	auth_rule_t t1, t2;
 	signature_scheme_t scheme;
 	void *value;
-	bool success = FALSE;
+	bool success = TRUE;
 
 	e2 = create_enumerator(this);
 	while (e2->enumerate(e2, &t2, &scheme))
