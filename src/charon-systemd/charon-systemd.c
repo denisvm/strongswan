@@ -349,6 +349,8 @@ int main(int argc, char *argv[])
 		sd_notifyf(0, "STATUS=libstrongswan initialization failed");
 		return SS_RC_INITIALIZATION_FAILED;
 	}
+	/* inherit settings from charon */
+	lib->settings->add_fallback(lib->settings, lib->ns, "charon");
 	if (lib->integrity &&
 		!lib->integrity->check_file(lib->integrity, "charon-systemd", argv[0]))
 	{
