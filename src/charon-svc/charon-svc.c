@@ -209,6 +209,8 @@ static void init_and_run(DWORD dwArgc, LPTSTR *lpszArgv, int (*wait)())
 		update_status(SERVICE_START_PENDING);
 		if (library_init(NULL, SERVICE_NAME))
 		{
+			/* inherit settings from charon */
+			lib->settings->add_fallback(lib->settings, lib->ns, "charon");
 			update_status(SERVICE_START_PENDING);
 			if (libhydra_init())
 			{
