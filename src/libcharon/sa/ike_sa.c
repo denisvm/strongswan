@@ -46,7 +46,6 @@
 #include "ike_sa.h"
 
 #include <library.h>
-#include <hydra.h>
 #include <daemon.h>
 #include <collections/array.h>
 #include <utils/lexparser.h>
@@ -786,12 +785,12 @@ METHOD(ike_sa_t, add_virtual_ip, void,
 	{
 		char *iface;
 
-		if (hydra->kernel_interface->get_interface(hydra->kernel_interface,
-												   this->my_host, &iface))
+		if (charon->kernel->get_interface(charon->kernel, this->my_host,
+										  &iface))
 		{
 			DBG1(DBG_IKE, "installing new virtual IP %H", ip);
-			if (hydra->kernel_interface->add_ip(hydra->kernel_interface,
-												ip, -1, iface) == SUCCESS)
+			if (charon->kernel->add_ip(charon->kernel, ip, -1,
+									   iface) == SUCCESS)
 			{
 				array_insert_create(&this->my_vips, ARRAY_TAIL, ip->clone(ip));
 			}
@@ -828,8 +827,7 @@ METHOD(ike_sa_t, clear_virtual_ips, void,
 	{
 		if (local)
 		{
-			hydra->kernel_interface->del_ip(hydra->kernel_interface,
-											vip, -1, TRUE);
+			charon->kernel->del_ip(charon->kernel, vip, -1, TRUE);
 		}
 		vip->destroy(vip);
 	}
@@ -1265,8 +1263,8 @@ static void resolve_hosts(private_ike_sa_t *this)
 			!this->other_host->is_anyaddr(this->other_host))
 		{
 			host->destroy(host);
-			host = hydra->kernel_interface->get_source_addr(
-							hydra->kernel_interface, this->other_host, NULL);
+			host = charon->kernel->get_source_addr(charon->kernel,
+												   this->other_host, NULL);
 			if (host)
 			{
 				host->set_port(host, this->ike_cfg->get_my_port(this->ike_cfg));
@@ -2067,8 +2065,8 @@ static bool is_current_path_valid(private_ike_sa_t *this)
 {
 	bool valid = FALSE;
 	host_t *src;
-	src = hydra->kernel_interface->get_source_addr(hydra->kernel_interface,
-											this->other_host, this->my_host);
+	src = charon->kernel->get_source_addr(charon->kernel, this->other_host,
+										  this->my_host);
 	if (src)
 	{
 		if (src->ip_equals(src, this->my_host))
@@ -2112,8 +2110,7 @@ static bool is_any_path_valid(private_ike_sa_t *this)
 			continue;
 		}
 		DBG1(DBG_IKE, "looking for a route to %H ...", addr);
-		src = hydra->kernel_interface->get_source_addr(
-										hydra->kernel_interface, addr, NULL);
+		src = charon->kernel->get_source_addr(charon->kernel, addr, NULL);
 		if (src)
 		{
 			break;
@@ -2401,7 +2398,7 @@ METHOD(ike_sa_t, destroy, void,
 	}
 	while (array_remove(this->my_vips, ARRAY_TAIL, &vip))
 	{
-		hydra->kernel_interface->del_ip(hydra->kernel_interface, vip, -1, TRUE);
+		charon->kernel->del_ip(charon->kernel, vip, -1, TRUE);
 		vip->destroy(vip);
 	}
 	if (array_count(this->other_vips))
